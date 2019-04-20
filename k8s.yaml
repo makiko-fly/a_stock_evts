@@ -1,0 +1,86 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    description: flashtick
+  labels:
+    app: flashtick
+    qcloud-app: flashtick
+  name: flashtick
+  namespace: flash
+spec:
+  minReadySeconds: 10
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: flashtick
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: flashtick
+        version: v1
+    spec:
+      containers:
+      - env:
+        - name: AIRFLOW
+          value: "1"
+        - name: PATH
+          value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        - name: CONFIGOR_ENV
+          value: ivkprod
+        - name: CONFIG_ETCDS
+          value: http://10.1.0.2:2379,http://10.1.0.210:2379,10.1.0.222:2379
+        - name: RPC_CLIENT
+          value: grpc
+        - name: CLOUD_PROVIDER
+          value: istio
+        image: ccr.ccs.tencentyun.com/dhub.wallstcn.com/flashtick:istio-sit
+        imagePullPolicy: Always
+        name: flashtick
+        ports:
+        - containerPort: 10088
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      - name: tencenthubkey
+      restartPolicy: Always
+      securityContext: {}
+      serviceAccountName: ""
+      terminationGracePeriodSeconds: 30
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: flashtick
+  namespace: flash
+  labels:
+    app: flashtick
+    qcloud-app: flashtick
+spec:
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 10088
+      targetPort: 10088
+  selector:
+    app: flashtick
+  type: ClusterIP

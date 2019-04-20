@@ -1,0 +1,50 @@
+logging:
+  enable: true
+  level: 5
+  formatter: "text"
+  hooks:
+    - name: "NSQHook"
+      enable: true
+      level: 5
+      formatter: "json"
+      nsqd_address: "10.0.0.18:4150"
+      topic: "flash.flashcollect.log.topic"
+
+micro:
+  svc_name: "gitlab.wallstcn.com.flashtick"
+  etcd_addrs:
+      - "10.0.0.154:2379"
+      - "10.0.0.161:2379"
+      - "10.0.0.48:2379"
+  client_pool_size: 30
+  rpc_server: "grpc"
+
+redis:
+    host: "10.0.200.12"
+    port: 6379
+    auth: "crs-nk1qj289:253Huaerjie!"
+    db: 0
+    max_idle: 40
+    idle_timeout: 240
+
+nsq_consumer:
+  topic: "marketdata.fitting-server.consumer.stock-topic"
+  channel: "flashtick.channel"
+  lookup_address:
+    - "10.0.0.18:4161"
+
+nsq_producer:
+  nsqd_address: "10.0.0.18:4150"
+
+distask:
+  default_queue: "flash_distribute_tasks"
+  results_expire_in: 600
+  redis:
+    host: "10.0.200.12"
+    port: 6379
+    auth: "crs-nk1qj289:253Huaerjie!"
+    db: 3
+
+stock_yidong:
+    create_msg_url: "https://api-sit.xuangubao.cn/api/stocks/yidong/msg"
+    secret: "/dXWu[y14(nTW`{Y"
